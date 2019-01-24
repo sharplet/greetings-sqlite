@@ -1,0 +1,4 @@
+module CSQLite [system] {
+  umbrella header "CSQLite.h"
+  link "sqlite"
+}
