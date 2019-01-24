@@ -1,5 +1,6 @@
 import CSQLite
-import Foundation
+import class Foundation.NSError
+import let Foundation.NSLocalizedDescriptionKey
 
 public final class Database {
   private var handle: OpaquePointer!
