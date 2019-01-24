@@ -5,6 +5,12 @@ protocol ConsoleError: LocalizedError {
   var statusCode: Int32? { get }
 }
 
+extension Swift.Error {
+  var exitStatus: Int32 {
+    return (self as? ConsoleError)?.statusCode ?? EX_SOFTWARE
+  }
+}
+
 enum Error: ConsoleError {
   case missingPath
 
@@ -24,8 +30,7 @@ enum Error: ConsoleError {
 }
 
 func fail(_ error: Swift.Error) -> Never {
-  let status = (error as? ConsoleError)?.statusCode ?? EX_SOFTWARE
-  fail(error.localizedDescription, status: status)
+  fail(error.localizedDescription, status: error.exitStatus)
 }
 
 func fail(_ message: String, status: Int32) -> Never {
