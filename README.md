@@ -1,3 +1,3 @@
 # swift-sqlite
 
-A description of this package.
+Playing around with a lightweight wrapper for SQLite.
