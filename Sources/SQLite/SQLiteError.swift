@@ -1,5 +1,6 @@
 import Foundation
 
+// swiftformat:disable all
 @objc public enum SQLiteErrorCode: Int32 {
 //case OK          =  0   /* Successful result */
   case ERROR       =  1   /* Generic error */
@@ -33,6 +34,7 @@ import Foundation
 //case ROW         = 100  /* sqlite3_step() has another row ready */
 //case DONE        = 101  /* sqlite3_step() has finished executing */
 }
+// swiftformat:enable all
 
 public struct SQLiteError: _BridgedStoredNSError {
   public static let errorDomain = "SQLiteErrorDomain"

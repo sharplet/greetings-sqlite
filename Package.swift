@@ -3,13 +3,13 @@
 import PackageDescription
 
 let package = Package(
-  name: "swift-sqlite",
+  name: "greetings",
   targets: [
-    .target(name: "swift-sqlite", dependencies: ["SQLite"]),
+    .target(name: "greetings", dependencies: ["SQLite"]),
     .target(name: "SQLite", dependencies: ["CSQLite"]),
     .systemLibrary(name: "CSQLite", pkgConfig: "sqlite3", providers: [
       .brew(["sqlite"]),
     ]),
-    .testTarget(name: "swift-sqliteTests", dependencies: ["swift-sqlite"]),
+    .testTarget(name: "GreetingsTests", dependencies: ["greetings"]),
   ]
 )

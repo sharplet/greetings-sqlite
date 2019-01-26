@@ -1,8 +1,8 @@
 import XCTest
 
-import swift_sqliteTests
+import GreetingsTests
 
 var tests = [XCTestCaseEntry]()
-tests += swift_sqliteTests.__allTests()
+tests += GreetingsTests.__allTests()
 
 XCTMain(tests)

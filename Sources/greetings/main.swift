@@ -1,5 +1,5 @@
-import SQLite
 import Foundation
+import SQLite
 
 protocol ConsoleError: LocalizedError {
   var statusCode: Int32? { get }
