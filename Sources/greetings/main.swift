@@ -10,9 +10,9 @@ func fail(_ message: String, status: Int32) -> Never {
   exit(status)
 }
 
-let arguments = Array(CommandLine.arguments.dropFirst())
-
 func main() throws {
+  let arguments = CommandLine.arguments.dropFirst()
+
   guard let path = arguments.first else {
     throw GreetingsError.missingPath
   }
