@@ -1,34 +1,6 @@
 import Foundation
 import SQLite
 
-protocol ConsoleError: LocalizedError {
-  var statusCode: Int32? { get }
-}
-
-extension Swift.Error {
-  var exitStatus: Int32 {
-    return (self as? ConsoleError)?.statusCode ?? EX_SOFTWARE
-  }
-}
-
-enum Error: ConsoleError {
-  case missingPath
-
-  var errorDescription: String? {
-    switch self {
-    case .missingPath:
-      return "Please specify a database file"
-    }
-  }
-
-  var statusCode: Int32? {
-    switch self {
-    case .missingPath:
-      return EX_USAGE
-    }
-  }
-}
-
 func fail(_ error: Swift.Error) -> Never {
   fail(error.localizedDescription, status: error.exitStatus)
 }
@@ -42,7 +14,7 @@ let arguments = Array(CommandLine.arguments.dropFirst())
 
 func main() throws {
   guard let path = arguments.first else {
-    throw Error.missingPath
+    throw GreetingsError.missingPath
   }
 
   let database = try Database(createIfNecessaryAtPath: path)
