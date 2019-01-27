@@ -2,6 +2,11 @@ import CSQLite
 import class Foundation.NSError
 
 final class PreparedStatement {
+  enum Result<Row> {
+    case row(Row)
+    case done
+  }
+
   private var statement: OpaquePointer?
 
   init(connection: OpaquePointer, sql: String) throws {
@@ -11,13 +16,12 @@ final class PreparedStatement {
     }
   }
 
-  func decodeNext<Row: Decodable>(_: Row.Type) throws -> Row? {
-    guard let statement = statement else { return nil }
+  func decodeNext<Row: Decodable>(_: Row.Type) throws -> Result<Row> {
+    guard let statement = statement else { return .done }
 
     switch sqlite3_step(statement) {
     case SQLITE_DONE:
-      try finalize()
-      return nil
+      return .done
     case SQLITE_ROW:
       break
     case let error:
@@ -25,7 +29,8 @@ final class PreparedStatement {
     }
 
     let decoder = SQLiteDecoder(statement: statement)
-    return try Row(from: decoder)
+    let row = try Row(from: decoder)
+    return .row(row)
   }
 
   func finalize() throws {
