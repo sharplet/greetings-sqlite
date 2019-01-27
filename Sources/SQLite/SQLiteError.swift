@@ -1,3 +1,4 @@
+import CSQLite
 import Foundation
 
 // swiftformat:disable all
@@ -37,12 +38,30 @@ import Foundation
 // swiftformat:enable all
 
 public struct SQLiteError: _BridgedStoredNSError {
-  public static let errorDomain = "SQLiteErrorDomain"
+  public static let errorDomain: String = {
+    let domain = "SQLiteErrorDomain"
+    if #available(OSX 10.11, *) {
+      NSError.setUserInfoValueProvider(forDomain: domain, provider: sqliteUserInfoValue(for:userInfoKey:))
+    }
+    return domain
+  }()
+
+  private static func sqliteUserInfoValue(for error: Error, userInfoKey: String) -> Any? {
+    switch userInfoKey {
+    case NSLocalizedDescriptionKey:
+      let code = Int32((error as NSError).code)
+      return String(cString: sqlite3_errstr(code))
+    default:
+      return nil
+    }
+  }
 
   // swiftlint:disable:next identifier_name
   public let _nsError: NSError
 
   public init(_nsError error: NSError) {
+    // Ensure the user info handler is registered.
+    _ = SQLiteError.errorDomain
     precondition(error.domain == SQLiteError.errorDomain)
     self._nsError = error
   }

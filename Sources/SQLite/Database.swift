@@ -21,13 +21,8 @@ public final class Database {
   public func execute(_ sql: String) throws {
     var error: UnsafeMutablePointer<CChar>?
     let status = sqlite3_exec(handle, sql, nil, nil, &error)
-
     guard status == SQLITE_OK else {
-      let userInfo = error.map { error in
-        [NSLocalizedDescriptionKey: String(cString: error)]
-      }
-
-      throw NSError(domain: SQLiteError.errorDomain, code: Int(status), userInfo: userInfo)
+      throw NSError(domain: SQLiteError.errorDomain, code: Int(status))
     }
   }
 
