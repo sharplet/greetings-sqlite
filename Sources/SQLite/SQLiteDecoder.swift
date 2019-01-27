@@ -69,7 +69,13 @@ private struct KeyedRowDecoder<Key: CodingKey>: KeyedDecodingContainerProtocol {
   }
 
   func decode(_ type: Bool.Type, forKey key: Key) throws -> Bool {
-    fatalError()
+    let index = try columnIndex(forKey: key)
+    let type = SQLiteType(rawValue: sqlite3_column_type(statement, index))!
+    guard type == .INTEGER else {
+      let message = "Expected to decode \(Bool.self) (\(SQLiteType.INTEGER)) but found \(type)"
+      throw DecodingError.dataCorruptedError(forKey: key, in: self, debugDescription: message)
+    }
+    return sqlite3_column_int(statement, index) != 0
   }
 
   func decode(_ type: String.Type, forKey key: Key) throws -> String {

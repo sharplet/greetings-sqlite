@@ -22,9 +22,9 @@ func main() throws {
   }
 
   let database = try Database(createIfNecessaryAtPath: path)
-  try database.execute("CREATE TABLE IF NOT EXISTS greetings (text TEXT);")
+  try database.execute("CREATE TABLE IF NOT EXISTS greetings (text TEXT, is_friendly INTEGER);")
 
-  var query = try database.execute("SELECT text FROM greetings;", as: Greeting.self)
+  var query = try database.execute("SELECT text, is_friendly FROM greetings;", as: Greeting.self)
   var results: [Greeting] = []
   while let greeting = try query.next() {
     results.append(greeting)
@@ -35,7 +35,7 @@ func main() throws {
   } else {
     print("Greetings:")
     for greeting in results {
-      print("- \(greeting.text)")
+      print("- \(greeting.text)\(greeting.isFriendly ? "!" : "")")
     }
   }
 }

@@ -1,5 +1,11 @@
 struct Greeting {
+  var isFriendly: Bool
   var text: String
 }
 
-extension Greeting: Decodable {}
+extension Greeting: Decodable {
+  private enum CodingKeys: String, CodingKey {
+    case text
+    case isFriendly = "is_friendly"
+  }
+}
