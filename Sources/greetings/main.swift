@@ -1,12 +1,14 @@
 import Foundation
 import SQLite
 
+var isDebugEnabled: Bool {
+  guard let value = ProcessInfo.processInfo.environment["GREETINGS_DEBUG"] else { return false }
+  return (value as NSString).boolValue
+}
+
 func fail(_ error: Swift.Error) -> Never {
-#if DEBUG
-  fail("\(error)", status: error.exitStatus)
-#else
-  fail(error.localizedDescription, status: error.exitStatus)
-#endif
+  let message = isDebugEnabled ? "\(error)" : error.localizedDescription
+  fail(message, status: error.exitStatus)
 }
 
 func fail(_ message: String, status: Int32) -> Never {
