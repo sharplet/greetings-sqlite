@@ -3,7 +3,13 @@ import class Foundation.NSError
 import let Foundation.NSLocalizedDescriptionKey
 
 public final class Database {
-  private var handle: OpaquePointer!
+  private(set) var handle: OpaquePointer!
+
+  public var error: Error? {
+    let status = sqlite3_errcode(handle)
+    guard status != SQLITE_OK else { return nil }
+    return NSError(domain: SQLiteError.errorDomain, code: Int(status))
+  }
 
   public init(createIfNecessaryAtPath path: String) throws {
     let flags = SQLITE_OPEN_CREATE | SQLITE_OPEN_READWRITE
@@ -14,7 +20,7 @@ public final class Database {
   }
 
   public func execute<Row: Decodable>(_ sql: String, as _: Row.Type) throws -> RowEnumerator<Row> {
-    let statement = try PreparedStatement(connection: handle, sql: sql)
+    let statement = try PreparedStatement(sql: sql, database: self)
     return RowEnumerator(statement: statement)
   }
 

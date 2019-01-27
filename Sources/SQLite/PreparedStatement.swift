@@ -7,15 +7,15 @@ final class PreparedStatement {
     case done
   }
 
-  private let connection: OpaquePointer
   private var statement: OpaquePointer?
+  private unowned let database: Database
 
-  init(connection: OpaquePointer, sql: String) throws {
-    let status = sqlite3_prepare_v2(connection, sql, -1, &statement, nil)
+  init(sql: String, database: Database) throws {
+    let status = sqlite3_prepare_v2(database.handle, sql, -1, &statement, nil)
     guard status == SQLITE_OK else {
       throw NSError(domain: SQLiteError.errorDomain, code: Int(status))
     }
-    self.connection = connection
+    self.database = database
   }
 
   func decodeNext<Row: Decodable>(_: Row.Type) throws -> Result<Row> {
@@ -30,7 +30,7 @@ final class PreparedStatement {
       throw NSError(domain: SQLiteError.errorDomain, code: Int(error))
     }
 
-    let decoder = SQLiteDecoder(connection: connection, statement: statement)
+    let decoder = SQLiteDecoder(database: database, statement: statement)
     let row = try Row(from: decoder)
     return .row(row)
   }
