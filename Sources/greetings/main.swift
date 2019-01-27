@@ -2,7 +2,11 @@ import Foundation
 import SQLite
 
 func fail(_ error: Swift.Error) -> Never {
+#if DEBUG
+  fail("\(error)", status: error.exitStatus)
+#else
   fail(error.localizedDescription, status: error.exitStatus)
+#endif
 }
 
 func fail(_ message: String, status: Int32) -> Never {
@@ -20,9 +24,10 @@ func main() throws {
   let database = try Database(createIfNecessaryAtPath: path)
   try database.execute("CREATE TABLE IF NOT EXISTS greetings (text TEXT);")
 
-  var results: [String] = []
-  try database.execute("SELECT text FROM greetings;") { row in
-    results.append(row["text"]!)
+  var query = try database.execute("SELECT text FROM greetings;", as: Greeting.self)
+  var results: [Greeting] = []
+  while let greeting = try query.next() {
+    results.append(greeting)
   }
 
   if results.isEmpty {
@@ -30,7 +35,7 @@ func main() throws {
   } else {
     print("Greetings:")
     for greeting in results {
-      print("- \(greeting)")
+      print("- \(greeting.text)")
     }
   }
 }

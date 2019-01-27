@@ -13,6 +13,11 @@ public final class Database {
     }
   }
 
+  public func execute<Row: Decodable>(_ sql: String, as _: Row.Type) throws -> RowEnumerator<Row> {
+    let statement = try PreparedStatement(connection: handle, sql: sql)
+    return RowEnumerator(statement: statement)
+  }
+
   public func execute(_ sql: String) throws {
     var error: UnsafeMutablePointer<CChar>?
     let status = sqlite3_exec(handle, sql, nil, nil, &error)
