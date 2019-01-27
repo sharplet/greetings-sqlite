@@ -7,6 +7,7 @@ final class PreparedStatement {
     case done
   }
 
+  private let connection: OpaquePointer
   private var statement: OpaquePointer?
 
   init(connection: OpaquePointer, sql: String) throws {
@@ -14,6 +15,7 @@ final class PreparedStatement {
     guard status == SQLITE_OK else {
       throw NSError(domain: SQLiteError.errorDomain, code: Int(status))
     }
+    self.connection = connection
   }
 
   func decodeNext<Row: Decodable>(_: Row.Type) throws -> Result<Row> {
@@ -28,7 +30,7 @@ final class PreparedStatement {
       throw NSError(domain: SQLiteError.errorDomain, code: Int(error))
     }
 
-    let decoder = SQLiteDecoder(statement: statement)
+    let decoder = SQLiteDecoder(connection: connection, statement: statement)
     let row = try Row(from: decoder)
     return .row(row)
   }

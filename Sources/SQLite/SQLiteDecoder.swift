@@ -4,14 +4,16 @@ import class Foundation.NSError
 struct SQLiteDecoder: Decoder {
   let codingPath: [CodingKey] = []
   let userInfo: [CodingUserInfoKey: Any] = [:]
+  private let connection: OpaquePointer
   private let statement: OpaquePointer
 
-  init(statement: OpaquePointer) {
+  init(connection: OpaquePointer, statement: OpaquePointer) {
+    self.connection = connection
     self.statement = statement
   }
 
   func container<Key>(keyedBy type: Key.Type) throws -> KeyedDecodingContainer<Key> where Key : CodingKey {
-    let container = try KeyedRowDecoder<Key>(statement: statement)
+    let container = try KeyedRowDecoder<Key>(connection: connection, statement: statement)
     return KeyedDecodingContainer(container)
   }
 
@@ -26,6 +28,7 @@ struct SQLiteDecoder: Decoder {
 
 private struct KeyedRowDecoder<Key: CodingKey>: KeyedDecodingContainerProtocol {
   private let keys: [String: (index: Int32, key: Key)]
+  private let connection: OpaquePointer
   private let statement: OpaquePointer
 
   var allKeys: [Key] {
@@ -34,13 +37,14 @@ private struct KeyedRowDecoder<Key: CodingKey>: KeyedDecodingContainerProtocol {
 
   let codingPath: [CodingKey] = []
 
-  init(statement: OpaquePointer) throws {
+  init(connection: OpaquePointer, statement: OpaquePointer) throws {
     let count = sqlite3_column_count(statement)
     var keys: [String: (Int32, Key)] = [:]
 
     for i in 0..<count {
       guard let name = sqlite3_column_name(statement, i).map(String.init(cString:)) else {
-        throw SQLiteError(.NOMEM)
+        let status = sqlite3_errcode(connection)
+        throw NSError(domain: SQLiteError.errorDomain, code: Int(status))
       }
 
       if let key = Key(stringValue: name) {
@@ -49,6 +53,7 @@ private struct KeyedRowDecoder<Key: CodingKey>: KeyedDecodingContainerProtocol {
     }
 
     self.keys = keys
+    self.connection = connection
     self.statement = statement
   }
 
@@ -88,7 +93,7 @@ private struct KeyedRowDecoder<Key: CodingKey>: KeyedDecodingContainerProtocol {
     if let text = sqlite3_column_text(statement, index) {
       return String(cString: text)
     } else {
-      let status = sqlite3_errcode(statement)
+      let status = sqlite3_errcode(connection)
       if status == SQLITE_OK {
         let message = "Expected \(String.self) (SQLITE_TEXT) value but found NULL instead."
         let context = DecodingError.Context(codingPath: codingPath + [key], debugDescription: message)
