@@ -5,11 +5,13 @@ struct SQLiteDecoder: Decoder {
   let codingPath: [CodingKey] = []
   let userInfo: [CodingUserInfoKey: Any] = [:]
   private unowned let statement: PreparedStatement
-  private unowned let database: Database
 
-  init(statement: PreparedStatement, database: Database) {
+  private var database: Database {
+    return statement.database
+  }
+
+  init(statement: PreparedStatement) {
     self.statement = statement
-    self.database = database
   }
 
   func container<Key>(keyedBy type: Key.Type) throws -> KeyedDecodingContainer<Key> where Key : CodingKey {

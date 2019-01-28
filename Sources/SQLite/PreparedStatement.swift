@@ -8,7 +8,7 @@ final class PreparedStatement {
   }
 
   private(set) var handle: OpaquePointer?
-  private unowned let database: Database
+  unowned let database: Database
 
   init(sql: String, database: Database) throws {
     let status = sqlite3_prepare_v2(database.handle, sql, -1, &handle, nil)

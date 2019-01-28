@@ -2,11 +2,9 @@ import CSQLite
 
 public struct RowEnumerator<Row: Decodable> {
   private var statement: PreparedStatement?
-  private let database: Database
 
-  init(statement: PreparedStatement, database: Database) {
+  init(statement: PreparedStatement) {
     self.statement = statement
-    self.database = database
   }
 
   public mutating func next() throws -> Row? {
@@ -14,7 +12,7 @@ public struct RowEnumerator<Row: Decodable> {
 
     switch try statement.step() {
     case .row:
-      let decoder = SQLiteDecoder(statement: statement, database: database)
+      let decoder = SQLiteDecoder(statement: statement)
       return try Row(from: decoder)
 
     case .done:

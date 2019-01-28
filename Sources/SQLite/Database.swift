@@ -21,7 +21,7 @@ public final class Database {
 
   public func execute<Row: Decodable>(_ sql: String, as _: Row.Type) throws -> RowEnumerator<Row> {
     let statement = try PreparedStatement(sql: sql, database: self)
-    return RowEnumerator(statement: statement, database: self)
+    return RowEnumerator(statement: statement)
   }
 
   public func execute(_ sql: String) throws {
