@@ -15,7 +15,7 @@ struct SQLiteDecoder: Decoder {
   }
 
   func container<Key>(keyedBy _: Key.Type) throws -> KeyedDecodingContainer<Key> where Key: CodingKey {
-    let container = try KeyedRowDecoder<Key>(statement: statement, database: database)
+    let container = KeyedRowDecoder<Key>(statement: statement, database: database)
     return KeyedDecodingContainer(container)
   }
 
@@ -39,7 +39,7 @@ private struct KeyedRowDecoder<Key: CodingKey>: KeyedDecodingContainerProtocol {
 
   let codingPath: [CodingKey] = []
 
-  init(statement: PreparedStatement, database: Database) throws {
+  init(statement: PreparedStatement, database: Database) {
     var keys: [String: (Int, Key)] = [:]
 
     for index in 0 ..< statement.columnCount {
