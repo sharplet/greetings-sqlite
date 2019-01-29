@@ -14,7 +14,7 @@ struct SQLiteDecoder: Decoder {
     self.statement = statement
   }
 
-  func container<Key>(keyedBy type: Key.Type) throws -> KeyedDecodingContainer<Key> where Key : CodingKey {
+  func container<Key>(keyedBy _: Key.Type) throws -> KeyedDecodingContainer<Key> where Key: CodingKey {
     let container = try KeyedRowDecoder<Key>(statement: statement, database: database)
     return KeyedDecodingContainer(container)
   }
@@ -67,7 +67,7 @@ private struct KeyedRowDecoder<Key: CodingKey>: KeyedDecodingContainerProtocol {
     return keys[key.stringValue] != nil
   }
 
-  func decodeNil(forKey key: Key) throws -> Bool {
+  func decodeNil(forKey _: Key) throws -> Bool {
     fatalError()
   }
 
@@ -99,63 +99,63 @@ private struct KeyedRowDecoder<Key: CodingKey>: KeyedDecodingContainerProtocol {
     }
   }
 
-  func decode(_ type: Double.Type, forKey key: Key) throws -> Double {
+  func decode(_: Double.Type, forKey _: Key) throws -> Double {
     fatalError()
   }
 
-  func decode(_ type: Float.Type, forKey key: Key) throws -> Float {
+  func decode(_: Float.Type, forKey _: Key) throws -> Float {
     fatalError()
   }
 
-  func decode(_ type: Int.Type, forKey key: Key) throws -> Int {
+  func decode(_: Int.Type, forKey _: Key) throws -> Int {
     fatalError()
   }
 
-  func decode(_ type: Int8.Type, forKey key: Key) throws -> Int8 {
+  func decode(_: Int8.Type, forKey _: Key) throws -> Int8 {
     fatalError()
   }
 
-  func decode(_ type: Int16.Type, forKey key: Key) throws -> Int16 {
+  func decode(_: Int16.Type, forKey _: Key) throws -> Int16 {
     fatalError()
   }
 
-  func decode(_ type: Int32.Type, forKey key: Key) throws -> Int32 {
+  func decode(_: Int32.Type, forKey _: Key) throws -> Int32 {
     fatalError()
   }
 
-  func decode(_ type: Int64.Type, forKey key: Key) throws -> Int64 {
+  func decode(_: Int64.Type, forKey _: Key) throws -> Int64 {
     fatalError()
   }
 
-  func decode(_ type: UInt.Type, forKey key: Key) throws -> UInt {
+  func decode(_: UInt.Type, forKey _: Key) throws -> UInt {
     fatalError()
   }
 
-  func decode(_ type: UInt8.Type, forKey key: Key) throws -> UInt8 {
+  func decode(_: UInt8.Type, forKey _: Key) throws -> UInt8 {
     fatalError()
   }
 
-  func decode(_ type: UInt16.Type, forKey key: Key) throws -> UInt16 {
+  func decode(_: UInt16.Type, forKey _: Key) throws -> UInt16 {
     fatalError()
   }
 
-  func decode(_ type: UInt32.Type, forKey key: Key) throws -> UInt32 {
+  func decode(_: UInt32.Type, forKey _: Key) throws -> UInt32 {
     fatalError()
   }
 
-  func decode(_ type: UInt64.Type, forKey key: Key) throws -> UInt64 {
+  func decode(_: UInt64.Type, forKey _: Key) throws -> UInt64 {
     fatalError()
   }
 
-  func decode<T>(_ type: T.Type, forKey key: Key) throws -> T where T : Decodable {
+  func decode<T>(_: T.Type, forKey _: Key) throws -> T where T: Decodable {
     fatalError()
   }
 
-  func nestedContainer<NestedKey>(keyedBy type: NestedKey.Type, forKey key: Key) throws -> KeyedDecodingContainer<NestedKey> where NestedKey : CodingKey {
+  func nestedContainer<NestedKey>(keyedBy _: NestedKey.Type, forKey _: Key) throws -> KeyedDecodingContainer<NestedKey> where NestedKey: CodingKey {
     fatalError()
   }
 
-  func nestedUnkeyedContainer(forKey key: Key) throws -> UnkeyedDecodingContainer {
+  func nestedUnkeyedContainer(forKey _: Key) throws -> UnkeyedDecodingContainer {
     fatalError()
   }
 
@@ -163,7 +163,7 @@ private struct KeyedRowDecoder<Key: CodingKey>: KeyedDecodingContainerProtocol {
     fatalError()
   }
 
-  func superDecoder(forKey key: Key) throws -> Decoder {
+  func superDecoder(forKey _: Key) throws -> Decoder {
     fatalError()
   }
 }
