@@ -6,16 +6,12 @@ struct SQLiteDecoder: Decoder {
   let userInfo: [CodingUserInfoKey: Any] = [:]
   private unowned let statement: PreparedStatement
 
-  private var database: Database {
-    return statement.database
-  }
-
   init(statement: PreparedStatement) {
     self.statement = statement
   }
 
   func container<Key>(keyedBy _: Key.Type) throws -> KeyedDecodingContainer<Key> where Key: CodingKey {
-    let container = KeyedRowDecoder<Key>(statement: statement, database: database)
+    let container = KeyedRowDecoder<Key>(statement: statement)
     return KeyedDecodingContainer(container)
   }
 
@@ -31,7 +27,6 @@ struct SQLiteDecoder: Decoder {
 private struct KeyedRowDecoder<Key: CodingKey>: KeyedDecodingContainerProtocol {
   private let keys: [String: (index: Int, key: Key)]
   private unowned let statement: PreparedStatement
-  private unowned let database: Database
 
   var allKeys: [Key] {
     return keys.keys.compactMap(Key.init(stringValue:))
@@ -39,7 +34,7 @@ private struct KeyedRowDecoder<Key: CodingKey>: KeyedDecodingContainerProtocol {
 
   let codingPath: [CodingKey] = []
 
-  init(statement: PreparedStatement, database: Database) {
+  init(statement: PreparedStatement) {
     var keys: [String: (Int, Key)] = [:]
 
     for index in 0 ..< statement.columnCount {
@@ -51,7 +46,6 @@ private struct KeyedRowDecoder<Key: CodingKey>: KeyedDecodingContainerProtocol {
     }
 
     self.keys = keys
-    self.database = database
     self.statement = statement
   }
 
@@ -90,7 +84,7 @@ private struct KeyedRowDecoder<Key: CodingKey>: KeyedDecodingContainerProtocol {
     }
     if let text = statement.get(String.self, at: index) {
       return text
-    } else if let error = database.error {
+    } else if let error = statement.database.error {
       throw error
     } else {
       let message = "Expected \(String.self) (SQLITE_TEXT) value but found NULL instead."
