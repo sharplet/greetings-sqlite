@@ -29,7 +29,7 @@ struct SQLiteDecoder: Decoder {
 }
 
 private struct KeyedRowDecoder<Key: CodingKey>: KeyedDecodingContainerProtocol {
-  private let keys: [String: (index: Int32, key: Key)]
+  private let keys: [String: (index: Int, key: Key)]
   private unowned let statement: PreparedStatement
   private unowned let database: Database
 
@@ -40,16 +40,13 @@ private struct KeyedRowDecoder<Key: CodingKey>: KeyedDecodingContainerProtocol {
   let codingPath: [CodingKey] = []
 
   init(statement: PreparedStatement, database: Database) throws {
-    let count = sqlite3_column_count(statement.handle)
-    var keys: [String: (Int32, Key)] = [:]
+    var keys: [String: (Int, Key)] = [:]
 
-    for i in 0..<count {
-      guard let name = sqlite3_column_name(statement.handle, i).map(String.init(cString:)) else {
-        throw database.error!
-      }
+    for index in 0 ..< statement.columnCount {
+      let name = statement.columnName(at: index)
 
       if let key = Key(stringValue: name) {
-        keys[name] = (i, key)
+        keys[name] = (index, key)
       }
     }
 
@@ -58,7 +55,7 @@ private struct KeyedRowDecoder<Key: CodingKey>: KeyedDecodingContainerProtocol {
     self.statement = statement
   }
 
-  private func columnIndex(forKey key: Key) throws -> Int32 {
+  private func columnIndex(forKey key: Key) throws -> Int {
     guard let index = keys[key.stringValue]?.index else {
       let context = DecodingError.Context(codingPath: codingPath, debugDescription: "")
       throw DecodingError.keyNotFound(key, context)
@@ -76,31 +73,29 @@ private struct KeyedRowDecoder<Key: CodingKey>: KeyedDecodingContainerProtocol {
 
   func decode(_ type: Bool.Type, forKey key: Key) throws -> Bool {
     let index = try columnIndex(forKey: key)
-    let type = SQLiteType(rawValue: sqlite3_column_type(statement.handle, index))!
+    let type = statement.columnType(at: index)
     guard type == .INTEGER else {
       let message = "Expected to decode \(Bool.self) (\(SQLiteType.INTEGER)) but found \(type)"
       throw DecodingError.dataCorruptedError(forKey: key, in: self, debugDescription: message)
     }
-    return sqlite3_column_int(statement.handle, index) != 0
+    return statement.get(Int32.self, at: index) != 0
   }
 
   func decode(_ type: String.Type, forKey key: Key) throws -> String {
     let index = try columnIndex(forKey: key)
-    let type = SQLiteType(rawValue: sqlite3_column_type(statement.handle, index))!
+    let type = statement.columnType(at: index)
     guard type == .TEXT else {
       let message = "Expected to decode \(String.self) (\(SQLiteType.TEXT)) but found \(type)"
       throw DecodingError.dataCorruptedError(forKey: key, in: self, debugDescription: message)
     }
-    if let text = sqlite3_column_text(statement.handle, index) {
-      return String(cString: text)
+    if let text = statement.get(String.self, at: index) {
+      return text
+    } else if let error = database.error {
+      throw error
     } else {
-      if let error = database.error {
-        throw error
-      } else {
-        let message = "Expected \(String.self) (SQLITE_TEXT) value but found NULL instead."
-        let context = DecodingError.Context(codingPath: codingPath + [key], debugDescription: message)
-        throw DecodingError.valueNotFound(String.self, context)
-      }
+      let message = "Expected \(String.self) (SQLITE_TEXT) value but found NULL instead."
+      let context = DecodingError.Context(codingPath: codingPath + [key], debugDescription: message)
+      throw DecodingError.valueNotFound(String.self, context)
     }
   }
 

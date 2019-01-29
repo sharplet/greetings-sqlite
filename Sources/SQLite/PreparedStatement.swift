@@ -7,7 +7,7 @@ final class PreparedStatement {
     case done
   }
 
-  private(set) var handle: OpaquePointer?
+  private var handle: OpaquePointer?
   unowned let database: Database
 
   init(sql: String, database: Database) throws {
@@ -16,6 +16,26 @@ final class PreparedStatement {
       throw NSError(domain: SQLiteError.errorDomain, code: Int(status))
     }
     self.database = database
+  }
+
+  var columnCount: Int {
+    return Int(sqlite3_column_count(handle))
+  }
+
+  func columnName(at index: Int) -> String {
+    guard let name = sqlite3_column_name(handle, Int32(index)) else {
+      // A NULL return value indicates that sqlite_malloc() failed,
+      // in which case the following string allocation probablywill also,
+      // so just bail out here.
+      let error = database.error.map { ": \($0)" } ?? ""
+      fatalError("Unexpected failure accessing column name\(error)")
+    }
+
+    return String(cString: name)
+  }
+
+  func columnType(at index: Int) -> SQLiteType {
+    return SQLiteType(rawValue: sqlite3_column_type(handle, Int32(index)))!
   }
 
   func step() throws -> StepResult {
@@ -41,5 +61,15 @@ final class PreparedStatement {
 
   deinit {
     try? finalize()
+  }
+}
+
+extension PreparedStatement {
+  func get(_: Int32.Type, at index: Int) -> Int32 {
+    return sqlite3_column_int(handle, Int32(index))
+  }
+
+  func get(_: String.Type, at index: Int) -> String? {
+    return sqlite3_column_text(handle, Int32(index)).map(String.init(cString:))
   }
 }
