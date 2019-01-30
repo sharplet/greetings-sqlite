@@ -1,10 +1,12 @@
 import Foundation
 import SQLite
 
-var isDebugEnabled: Bool {
+private let isDebugEnabled: Bool = {
   guard let value = ProcessInfo.processInfo.environment["GREETINGS_DEBUG"] else { return false }
   return (value as NSString).boolValue
-}
+}()
+
+private let programName: String = URL(fileURLWithPath: CommandLine.arguments[0]).lastPathComponent
 
 func fail(_ error: Swift.Error) -> Never {
   let message = isDebugEnabled ? "\(error)" : error.localizedDescription
@@ -12,7 +14,7 @@ func fail(_ error: Swift.Error) -> Never {
 }
 
 func fail(_ message: String, status: Int32) -> Never {
-  fputs("\(CommandLine.arguments[0]): \(message)\n", stderr)
+  fputs("\(programName): \(message)\n", stderr)
   exit(status)
 }
 
