@@ -44,8 +44,7 @@ public final class Database {
   }
 
   public func execute(_ sql: String) throws {
-    var error: UnsafeMutablePointer<CChar>?
-    let status = sqlite3_exec(handle, sql, nil, nil, &error)
+    let status = sqlite3_exec(handle, sql, nil, nil, nil)
     guard status == SQLITE_OK else {
       throw NSError(domain: SQLiteError.errorDomain, code: Int(status), userInfo: userInfo)
     }
@@ -54,22 +53,9 @@ public final class Database {
   public func execute(_ sql: String, rowHandler: (Row) throws -> Void) throws {
     try withoutActuallyEscaping(rowHandler) { rowHandler in
       let context = RowContext(handler: rowHandler)
-      var error: UnsafeMutablePointer<CChar>?
-
-      let status = sqlite3_exec(handle, sql, context.callback, context.pointer, &error)
-
+      let status = sqlite3_exec(handle, sql, context.callback, context.pointer, nil)
       guard status == SQLITE_OK else {
-        if let error = context.error {
-          throw error
-        } else {
-          var userInfo = self.userInfo
-
-          if let error = error {
-            userInfo[NSLocalizedDescriptionKey] = String(cString: error)
-          }
-
-          throw NSError(domain: SQLiteError.errorDomain, code: Int(status), userInfo: userInfo)
-        }
+        throw context.error ?? NSError(domain: SQLiteError.errorDomain, code: Int(status), userInfo: userInfo)
       }
     }
   }
