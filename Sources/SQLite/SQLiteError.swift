@@ -50,7 +50,7 @@ public struct SQLiteError: _BridgedStoredNSError {
     switch userInfoKey {
     case NSLocalizedDescriptionKey:
       let code = Int32((error as NSError).code)
-      return String(cString: sqlite3_errstr(code))
+      return String(cString: sqlite3_errstr(code)).firstLetterUppercased()
     default:
       return nil
     }
