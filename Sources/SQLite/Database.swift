@@ -14,12 +14,27 @@ public final class Database {
   }
 
   public init(createIfNecessaryAtPath path: String) throws {
-    let flags = SQLITE_OPEN_CREATE | SQLITE_OPEN_READWRITE
-    let status = sqlite3_open_v2(path, &handle, flags, nil)
+    var status = sqlite3_open_v2(path, &handle, SQLITE_OPEN_CREATE | SQLITE_OPEN_READWRITE, nil)
     self.path = path
 
     guard status == SQLITE_OK else {
       throw NSError(domain: SQLiteError.errorDomain, code: Int(status), userInfo: userInfo)
+    }
+
+    status = sqlite3_exec(handle, "PRAGMA schema_version;", nil, nil, nil)
+
+    guard status == SQLITE_OK else {
+      // If we can't close a database we just opened, something is really wrong.
+      try! close()
+      throw NSError(domain: SQLiteError.errorDomain, code: Int(status), userInfo: userInfo)
+    }
+  }
+
+  deinit {
+    do {
+      try close()
+    } catch {
+      assertionFailure("\(error)")
     }
   }
 
@@ -59,12 +74,15 @@ public final class Database {
     }
   }
 
-  private var userInfo: [String: Any] {
-    return [NSFilePathErrorKey: path]
+  private func close() throws {
+    let result = sqlite3_close_v2(handle)
+    guard result == SQLITE_OK else {
+      throw NSError(domain: SQLiteError.errorDomain, code: Int(result), userInfo: userInfo)
+    }
+    handle = nil
   }
 
-  deinit {
-    let result = sqlite3_close(handle)
-    assert(result == SQLITE_OK)
+  private var userInfo: [String: Any] {
+    return [NSFilePathErrorKey: path]
   }
 }
