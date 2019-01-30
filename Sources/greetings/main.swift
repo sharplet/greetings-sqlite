@@ -9,7 +9,7 @@ private let isDebugEnabled: Bool = {
 private let programName: String = URL(fileURLWithPath: CommandLine.arguments[0]).lastPathComponent
 
 func fail(_ error: Swift.Error) -> Never {
-  let message = isDebugEnabled ? "\(error)" : error.localizedDescription
+  let message = isDebugEnabled ? "\(error)" : error.consoleDescription
   fail(message, status: error.exitStatus)
 }
 
