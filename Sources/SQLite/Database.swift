@@ -43,10 +43,10 @@ public final class Database {
     return RowEnumerator(statement: statement)
   }
 
-  public func execute(_ sql: String) throws {
-    let status = sqlite3_exec(handle, sql, nil, nil, nil)
-    guard status == SQLITE_OK else {
-      throw NSError(domain: SQLiteError.errorDomain, code: Int(status), userInfo: userInfo)
+  public func execute(_ statement: SQLTemplate) throws {
+    let statement = try PreparedStatement(statement: statement, database: self)
+    while case .row = try statement.step() {
+      continue
     }
   }
 

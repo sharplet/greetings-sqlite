@@ -20,6 +20,13 @@ final class PreparedStatement {
     self.database = database
   }
 
+  convenience init(statement: SQLTemplate, database: Database) throws {
+    try self.init(sql: statement.rawValue, database: database)
+    for binding in statement.bindings {
+      try binding(self)
+    }
+  }
+
   var columnCount: Int {
     return Int(sqlite3_column_count(handle))
   }
@@ -63,6 +70,32 @@ final class PreparedStatement {
 
   deinit {
     try? finalize()
+  }
+}
+
+extension PreparedStatement {
+  func bind(_ value: Bool, at index: Int) throws {
+    guard let handle = handle else { return }
+    let status = sqlite3_bind_int(handle, Int32(index), value ? 1 : 0)
+    guard status == SQLITE_OK else {
+      throw NSError(domain: SQLiteError.errorDomain, code: Int(status), userInfo: userInfo)
+    }
+  }
+
+  func bind(_ value: String, at index: Int) throws {
+    guard let handle = handle else { return }
+
+    let status = value.utf8CString.withUnsafeBufferPointer { value -> Int32 in
+      let encoding = UInt8(SQLITE_UTF8)
+      let index = Int32(index)
+      let length = sqlite3_uint64(value.count) - 1
+      assert(value[Int(length)] == 0)
+      return sqlite3_bind_text64(handle, index, value.baseAddress, length, SQLITE_TRANSIENT, encoding)
+    }
+
+    guard status == SQLITE_OK else {
+      throw NSError(domain: SQLiteError.errorDomain, code: Int(status), userInfo: userInfo)
+    }
   }
 }
 

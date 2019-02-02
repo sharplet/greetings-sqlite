@@ -1,2 +1,3 @@
 --indent 2
 --self init-only
+--disable blankLinesAtStartOfScope

@@ -1,6 +1,17 @@
 import Foundation
 import SQLite
 
+struct Parameters {
+  var isFriendly: Bool?
+  var newGreeting: String?
+  var path: String
+}
+
+enum ParsingMode {
+  case option
+  case argument(String, (String) -> Void)
+}
+
 private let isDebugEnabled: Bool = {
   guard let value = ProcessInfo.processInfo.environment["GREETINGS_DEBUG"] else { return false }
   return (value as NSString).boolValue
@@ -18,16 +29,73 @@ func fail(_ message: String, status: Int32) -> Never {
   exit(status)
 }
 
-func main() throws {
-  let arguments = CommandLine.arguments.dropFirst()
+func parse<Arguments: RangeReplaceableCollection>(_ arguments: Arguments, dropFirst: Bool = true) throws -> Parameters
+  where Arguments.Element == String {
+
+  var arguments = dropFirst ? arguments.dropFirst() : arguments[...]
+  var mode = ParsingMode.option
+  var isFriendly: Bool?
+  var newGreeting: String?
+
+  arguments.removeAll { argument -> Bool in
+    switch (mode, argument) {
+    case let (.argument(_, setValue), value):
+      setValue(value)
+      mode = .option
+      return true
+
+    case let (_, name) where name == "-a" || name == "--add":
+      mode = .argument(name) { newGreeting = $0 }
+      return true
+
+    case (_, "--friendly"):
+      isFriendly = true
+      return true
+
+    default:
+      return false
+    }
+  }
+
+  if case let .argument(name, _) = mode {
+    throw GreetingsError.missingRequiredArgument(name)
+  }
 
   guard let path = arguments.first else {
     throw GreetingsError.missingPath
   }
 
-  let database = try Database(createIfNecessaryAtPath: path)
+  return Parameters(
+    isFriendly: isFriendly,
+    newGreeting: newGreeting,
+    path: path
+  )
+}
+
+func main() throws {
+  let parameters = try parse(CommandLine.arguments)
+  let database = try Database(createIfNecessaryAtPath: parameters.path)
   try database.execute("CREATE TABLE IF NOT EXISTS greetings (text TEXT, is_friendly INTEGER);")
 
+  if let newGreeting = parameters.newGreeting {
+    try addGreeting(newGreeting, isFriendly: parameters.isFriendly, in: database)
+  }
+
+  try printGreetings(in: database)
+}
+
+func addGreeting(_ text: String, isFriendly: Bool?, in database: Database) throws {
+  let statement: SQLTemplate
+  if let isFriendly = isFriendly {
+    statement = "INSERT INTO greetings (text, is_friendly) VALUES (\(text), \(isFriendly));"
+  } else {
+    statement = "INSERT INTO greetings (text) VALUES (\(text));"
+  }
+  try database.execute(statement)
+  print("success!")
+}
+
+func printGreetings(in database: Database) throws {
   var query = try database.execute("SELECT text, is_friendly FROM greetings;", as: Greeting.self)
   var results: [Greeting] = []
   while let greeting = try query.next() {
