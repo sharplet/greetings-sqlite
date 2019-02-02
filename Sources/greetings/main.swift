@@ -75,7 +75,15 @@ func parse<Arguments: RangeReplaceableCollection>(_ arguments: Arguments, dropFi
 func main() throws {
   let parameters = try parse(CommandLine.arguments)
   let database = try Database(createIfNecessaryAtPath: parameters.path)
-  try database.execute("CREATE TABLE IF NOT EXISTS greetings (text TEXT, is_friendly INTEGER);")
+
+  try database.execute(
+    """
+    CREATE TABLE IF NOT EXISTS greetings (
+      text TEXT NOT NULL,
+      is_friendly INTEGER DEFAULT 0
+    );
+    """
+  )
 
   if let newGreeting = parameters.newGreeting {
     try addGreeting(newGreeting, isFriendly: parameters.isFriendly, in: database)
