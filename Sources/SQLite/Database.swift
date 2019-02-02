@@ -13,6 +13,12 @@ public final class Database {
     return NSError(domain: SQLiteError.errorDomain, code: Int(status))
   }
 
+  public var lastInsertedRowID: Int64? {
+    let id = sqlite3_last_insert_rowid(handle)
+    guard id != 0 else { return nil }
+    return id
+  }
+
   public init(createIfNecessaryAtPath path: String) throws {
     var status = sqlite3_open_v2(path, &handle, SQLITE_OPEN_CREATE | SQLITE_OPEN_READWRITE, nil)
     self.path = path
@@ -38,8 +44,8 @@ public final class Database {
     }
   }
 
-  public func execute<Row: Decodable>(_ sql: String, as _: Row.Type) throws -> RowEnumerator<Row> {
-    let statement = try PreparedStatement(sql: sql, database: self)
+  public func execute<Row: Decodable>(_ statement: SQLTemplate, as _: Row.Type) throws -> RowEnumerator<Row> {
+    let statement = try PreparedStatement(statement: statement, database: self)
     return RowEnumerator(statement: statement)
   }
 

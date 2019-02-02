@@ -11,17 +11,15 @@ final class PreparedStatement {
   unowned let database: Database
   private let userInfo: [String: Any]
 
-  init(sql: String, database: Database) throws {
+  init(statement: SQLTemplate, database: Database) throws {
     self.userInfo = database.userInfo
-    let status = sqlite3_prepare_v2(database.handle, sql, -1, &handle, nil)
+
+    let status = sqlite3_prepare_v2(database.handle, statement.rawValue, -1, &handle, nil)
     guard status == SQLITE_OK else {
       throw NSError(domain: SQLiteError.errorDomain, code: Int(status), userInfo: userInfo)
     }
     self.database = database
-  }
 
-  convenience init(statement: SQLTemplate, database: Database) throws {
-    try self.init(sql: statement.rawValue, database: database)
     for binding in statement.bindings {
       try binding(self)
     }
@@ -77,6 +75,14 @@ extension PreparedStatement {
   func bind(_ value: Bool, at index: Int) throws {
     guard let handle = handle else { return }
     let status = sqlite3_bind_int(handle, Int32(index), value ? 1 : 0)
+    guard status == SQLITE_OK else {
+      throw NSError(domain: SQLiteError.errorDomain, code: Int(status), userInfo: userInfo)
+    }
+  }
+
+  func bind(_ value: Int64, at index: Int) throws {
+    guard let handle = handle else { return }
+    let status = sqlite3_bind_int64(handle, Int32(index), value)
     guard status == SQLITE_OK else {
       throw NSError(domain: SQLiteError.errorDomain, code: Int(status), userInfo: userInfo)
     }

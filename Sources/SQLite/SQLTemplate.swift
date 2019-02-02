@@ -37,6 +37,12 @@ extension SQLTemplate: ExpressibleByStringInterpolation {
       sql += "?"
     }
 
+    public mutating func appendInterpolation(_ value: Int64) {
+      let index = nextIndex()
+      bindings.append({ try $0.bind(value, at: index) })
+      sql += "?"
+    }
+
     public mutating func appendInterpolation(_ value: String) {
       let index = nextIndex()
       bindings.append({ try $0.bind(value, at: index) })
