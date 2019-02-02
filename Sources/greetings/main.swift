@@ -86,13 +86,14 @@ func main() throws {
   )
 
   if let newGreeting = parameters.newGreeting {
-    try addGreeting(newGreeting, isFriendly: parameters.isFriendly, in: database)
+    let greeting = try addGreeting(newGreeting, isFriendly: parameters.isFriendly, in: database)
+    print("Inserted: \(greeting)")
   } else {
     try printGreetings(in: database)
   }
 }
 
-func addGreeting(_ text: String, isFriendly: Bool?, in database: Database) throws {
+func addGreeting(_ text: String, isFriendly: Bool?, in database: Database) throws -> Greeting {
   let statement: SQLTemplate
   if let isFriendly = isFriendly {
     statement = "INSERT INTO greetings (text, is_friendly) VALUES (\(text), \(isFriendly));"
@@ -102,15 +103,9 @@ func addGreeting(_ text: String, isFriendly: Bool?, in database: Database) throw
 
   try database.execute(statement)
 
-  guard let id = database.lastInsertedRowID else {
-    assertionFailure("Expected a non-zero row ID")
-    return
-  }
-
+  let id = database.lastInsertedRowID!
   var result = try database.execute("SELECT text, is_friendly FROM greetings WHERE rowid = \(id);", as: Greeting.self)
-  while let g = try result.next() {
-    print("Inserted: \(g)")
-  }
+  return try result.next()!
 }
 
 func printGreetings(in database: Database) throws {
