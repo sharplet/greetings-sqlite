@@ -27,7 +27,7 @@ func main() throws {
     CREATE TABLE IF NOT EXISTS greetings (
       text TEXT NOT NULL,
       is_friendly INTEGER DEFAULT 0
-    );
+    )
     """
   )
 
