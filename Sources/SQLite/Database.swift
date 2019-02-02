@@ -68,7 +68,7 @@ public final class Database {
     handle = nil
   }
 
-  private var userInfo: [String: Any] {
+  var userInfo: [String: Any] {
     return [NSFilePathErrorKey: path]
   }
 }

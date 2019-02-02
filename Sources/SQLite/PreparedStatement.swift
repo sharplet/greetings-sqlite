@@ -9,11 +9,13 @@ final class PreparedStatement {
 
   private var handle: OpaquePointer?
   unowned let database: Database
+  private let userInfo: [String: Any]
 
   init(sql: String, database: Database) throws {
+    self.userInfo = database.userInfo
     let status = sqlite3_prepare_v2(database.handle, sql, -1, &handle, nil)
     guard status == SQLITE_OK else {
-      throw NSError(domain: SQLiteError.errorDomain, code: Int(status))
+      throw NSError(domain: SQLiteError.errorDomain, code: Int(status), userInfo: userInfo)
     }
     self.database = database
   }
@@ -47,7 +49,7 @@ final class PreparedStatement {
     case SQLITE_ROW:
       return .row
     case let error:
-      throw NSError(domain: SQLiteError.errorDomain, code: Int(error))
+      throw NSError(domain: SQLiteError.errorDomain, code: Int(error), userInfo: userInfo)
     }
   }
 
@@ -55,7 +57,7 @@ final class PreparedStatement {
     let status = sqlite3_finalize(handle)
     handle = nil
     guard status == SQLITE_OK else {
-      throw NSError(domain: SQLiteError.errorDomain, code: Int(status))
+      throw NSError(domain: SQLiteError.errorDomain, code: Int(status), userInfo: userInfo)
     }
   }
 
