@@ -26,15 +26,11 @@ extension Greeting: Insertable {
     var isFriendly: Bool
   }
 
-  struct TextParameters: Encodable {
-    var text: String
-  }
-
   static func insert(text: String, isFriendly: Bool?) throws -> Query<Int64> {
     if let isFriendly = isFriendly {
       return try insert.bind(.init(text: text, isFriendly: isFriendly))
     } else {
-      return try insertWithDefaults.bind(.init(text: text))
+      return try insertText.bind(text)
     }
   }
 
@@ -46,10 +42,10 @@ extension Greeting: Insertable {
     in: .current
   )
 
-  static let insertWithDefaults = try! Insert<Greeting, TextParameters>(
+  static let insertText = try! Insert<Greeting, String>(
     sql: """
       INSERT INTO greetings (text)
-      VALUES (:text)
+      VALUES (?)
       """,
     in: .current
   )

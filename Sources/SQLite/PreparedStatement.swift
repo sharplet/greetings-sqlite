@@ -29,6 +29,10 @@ final class PreparedStatement {
     }
   }
 
+  var bindParameterCount: Int {
+    return Int(sqlite3_bind_parameter_count(handle))
+  }
+
   var columnCount: Int {
     return Int(sqlite3_column_count(handle))
   }

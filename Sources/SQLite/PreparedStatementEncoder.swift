@@ -17,7 +17,7 @@ struct PreparedStatementEncoder: Encoder {
   }
 
   func singleValueContainer() -> SingleValueEncodingContainer {
-    fatalError()
+    return SingleValueStatementEncoder(codingPath: codingPath, statement: statement)
   }
 }
 
@@ -106,6 +106,98 @@ private struct KeyedStatementEncoder<Key: CodingKey>: KeyedEncodingContainerProt
   }
 
   mutating func superEncoder(forKey key: Key) -> Encoder {
+    fatalError()
+  }
+}
+
+private struct SingleValueStatementEncoder: SingleValueEncodingContainer {
+  let codingPath: [CodingKey]
+  unowned let statement: PreparedStatement
+  private var valueCount = 0
+
+  init(codingPath: [CodingKey], statement: PreparedStatement) {
+    self.codingPath = codingPath
+    self.statement = statement
+  }
+
+  private mutating func getIndex(for value: Any) throws -> Int {
+    valueCount += 1
+    guard valueCount == 1 else {
+      let context = EncodingError.Context(codingPath: codingPath, debugDescription: "Tried to encode multiple values in a single value container.")
+      throw EncodingError.invalidValue(value, context)
+    }
+
+    let parameterCount = statement.bindParameterCount
+    if codingPath.isEmpty && parameterCount != 1 {
+      let context = EncodingError.Context(codingPath: codingPath, debugDescription: "Unable to encode single value with bind parameter count of \(parameterCount).")
+      throw EncodingError.invalidValue(value, context)
+    }
+
+    return valueCount
+  }
+
+  mutating func encodeNil() throws {
+    fatalError()
+  }
+
+  mutating func encode(_ value: Bool) throws {
+    fatalError()
+  }
+
+  mutating func encode(_ value: String) throws {
+    let index = try getIndex(for: value)
+    try statement.bind(value, at: index)
+  }
+
+  mutating func encode(_ value: Double) throws {
+    fatalError()
+  }
+
+  mutating func encode(_ value: Float) throws {
+    fatalError()
+  }
+
+  mutating func encode(_ value: Int) throws {
+    fatalError()
+  }
+
+  mutating func encode(_ value: Int8) throws {
+    fatalError()
+  }
+
+  mutating func encode(_ value: Int16) throws {
+    fatalError()
+  }
+
+  mutating func encode(_ value: Int32) throws {
+    fatalError()
+  }
+
+  mutating func encode(_ value: Int64) throws {
+    fatalError()
+  }
+
+  mutating func encode(_ value: UInt) throws {
+    fatalError()
+  }
+
+  mutating func encode(_ value: UInt8) throws {
+    fatalError()
+  }
+
+  mutating func encode(_ value: UInt16) throws {
+    fatalError()
+  }
+
+  mutating func encode(_ value: UInt32) throws {
+    fatalError()
+  }
+
+  mutating func encode(_ value: UInt64) throws {
+    fatalError()
+  }
+
+  mutating func encode<T: Encodable>(_ value: T) throws {
     fatalError()
   }
 }
