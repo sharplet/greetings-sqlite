@@ -1,14 +1,17 @@
 struct PreparedStatementEncoder: Encoder {
-  let codingPath: [CodingKey] = []
+  let codingPath: [CodingKey]
+  let singleValueKey: CodingKey?
   let userInfo: [CodingUserInfoKey: Any] = [:]
   private unowned let statement: PreparedStatement
 
-  init(statement: PreparedStatement) {
+  init(statement: PreparedStatement, codingPath: [CodingKey] = [], singleValueKey: CodingKey? = nil) {
+    self.codingPath = codingPath
+    self.singleValueKey = singleValueKey
     self.statement = statement
   }
 
-  func container<Key>(keyedBy type: Key.Type) -> KeyedEncodingContainer<Key> where Key : CodingKey {
-    let container = KeyedStatementEncoder<Key>(statement: statement)
+  func container<Key>(keyedBy _: Key.Type) -> KeyedEncodingContainer<Key> where Key: CodingKey {
+    let container = KeyedStatementEncoder<Key>(codingPath: codingPath, statement: statement)
     return KeyedEncodingContainer(container)
   }
 
@@ -17,15 +20,16 @@ struct PreparedStatementEncoder: Encoder {
   }
 
   func singleValueContainer() -> SingleValueEncodingContainer {
-    return SingleValueStatementEncoder(codingPath: codingPath, statement: statement)
+    return SingleValueStatementEncoder(codingPath: codingPath, statement: statement, key: singleValueKey)
   }
 }
 
 private struct KeyedStatementEncoder<Key: CodingKey>: KeyedEncodingContainerProtocol {
-  let codingPath: [CodingKey] = []
+  let codingPath: [CodingKey]
   private unowned let statement: PreparedStatement
 
-  init(statement: PreparedStatement) {
+  init(codingPath: [CodingKey], statement: PreparedStatement) {
+    self.codingPath = codingPath
     self.statement = statement
   }
 
@@ -90,7 +94,8 @@ private struct KeyedStatementEncoder<Key: CodingKey>: KeyedEncodingContainerProt
   }
 
   mutating func encode<T: Encodable>(_ value: T, forKey key: Key) throws {
-    fatalError()
+    let encoder = PreparedStatementEncoder(statement: statement, codingPath: codingPath + [key], singleValueKey: key)
+    try value.encode(to: encoder)
   }
 
   mutating func nestedContainer<NestedKey>(keyedBy keyType: NestedKey.Type, forKey key: Key) -> KeyedEncodingContainer<NestedKey> {
@@ -105,19 +110,21 @@ private struct KeyedStatementEncoder<Key: CodingKey>: KeyedEncodingContainerProt
     fatalError()
   }
 
-  mutating func superEncoder(forKey key: Key) -> Encoder {
+  mutating func superEncoder(forKey _: Key) -> Encoder {
     fatalError()
   }
 }
 
 private struct SingleValueStatementEncoder: SingleValueEncodingContainer {
   let codingPath: [CodingKey]
+  let key: CodingKey?
   unowned let statement: PreparedStatement
   private var valueCount = 0
 
-  init(codingPath: [CodingKey], statement: PreparedStatement) {
+  init(codingPath: [CodingKey], statement: PreparedStatement, key: CodingKey?) {
     self.codingPath = codingPath
     self.statement = statement
+    self.key = key
   }
 
   private mutating func getIndex(for value: Any) throws -> Int {
@@ -128,7 +135,7 @@ private struct SingleValueStatementEncoder: SingleValueEncodingContainer {
     }
 
     let parameterCount = statement.bindParameterCount
-    if codingPath.isEmpty && parameterCount != 1 {
+    if codingPath.isEmpty, parameterCount != 1 {
       let context = EncodingError.Context(codingPath: codingPath, debugDescription: "Unable to encode single value with bind parameter count of \(parameterCount).")
       throw EncodingError.invalidValue(value, context)
     }
@@ -141,12 +148,21 @@ private struct SingleValueStatementEncoder: SingleValueEncodingContainer {
   }
 
   mutating func encode(_ value: Bool) throws {
-    fatalError()
+    if let key = key {
+      try statement.bind(value, forKey: key.stringValue)
+    } else {
+      let index = try getIndex(for: value)
+      try statement.bind(value, at: index)
+    }
   }
 
   mutating func encode(_ value: String) throws {
-    let index = try getIndex(for: value)
-    try statement.bind(value, at: index)
+    if let key = key {
+      try statement.bind(value, forKey: key.stringValue)
+    } else {
+      let index = try getIndex(for: value)
+      try statement.bind(value, at: index)
+    }
   }
 
   mutating func encode(_ value: Double) throws {

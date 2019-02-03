@@ -2,7 +2,7 @@ public struct Select<Row: Selectable, Parameters: Encodable> {
   private let statement: PreparedStatement
 
   public init(sql: String, in database: Database) throws {
-    statement = try PreparedStatement(sql: sql, database: database)
+    self.statement = try PreparedStatement(sql: sql, database: database)
   }
 
   public func bind(_ parameters: Parameters) throws -> Query<Row> {

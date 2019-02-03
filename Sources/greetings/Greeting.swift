@@ -1,6 +1,7 @@
 import SQLite
 
 struct Greeting {
+  var id: Int64
   var isFriendly: Bool
   var text: String
 }
@@ -11,8 +12,9 @@ extension Greeting: CustomStringConvertible {
   }
 }
 
-extension Greeting: Decodable, Queryable {
+extension Greeting: Queryable {
   enum CodingKeys: String, CodingKey {
+    case id = "rowid"
     case text
     case isFriendly = "is_friendly"
   }
@@ -21,7 +23,7 @@ extension Greeting: Decodable, Queryable {
 extension Greeting: Selectable {
   static let find: Select<Greeting, Int64> = try! Select(
     sql: """
-      SELECT text, is_friendly
+      SELECT rowid, text, is_friendly
       FROM greetings
       WHERE rowid = ?
       """,
@@ -30,8 +32,11 @@ extension Greeting: Selectable {
 }
 
 extension Greeting: Insertable {
-  struct Parameters: QueryParametersProtocol {
-    typealias CodingKeys = Greeting.CodingKeys
+  struct Parameters: QueryParameters {
+    static let bindings: Bindings<Greeting> = [
+      .text <- \.text,
+      .isFriendly <- \.isFriendly,
+    ]
 
     var text: String
     var isFriendly: Bool

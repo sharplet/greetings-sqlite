@@ -117,8 +117,14 @@ private struct KeyedRowDecoder<Key: CodingKey>: KeyedDecodingContainerProtocol {
     fatalError()
   }
 
-  func decode(_: Int64.Type, forKey _: Key) throws -> Int64 {
-    fatalError()
+  func decode(_: Int64.Type, forKey key: Key) throws -> Int64 {
+    let index = try columnIndex(forKey: key)
+    let type = statement.columnType(at: index)
+    guard type == .INTEGER else {
+      let message = "Expected to decode \(Int64.self) (\(SQLiteType.INTEGER)) but found \(type)"
+      throw DecodingError.dataCorruptedError(forKey: key, in: self, debugDescription: message)
+    }
+    return statement.get(Int64.self, at: index)
   }
 
   func decode(_: UInt.Type, forKey _: Key) throws -> UInt {

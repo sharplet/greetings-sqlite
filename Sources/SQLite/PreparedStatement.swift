@@ -168,6 +168,10 @@ extension PreparedStatement {
     return sqlite3_column_int(handle, Int32(index))
   }
 
+  func get(_: Int64.Type, at index: Int) -> Int64 {
+    return sqlite3_column_int64(handle, Int32(index))
+  }
+
   func get(_: String.Type, at index: Int) -> String? {
     return sqlite3_column_text(handle, Int32(index)).map(String.init(cString:))
   }

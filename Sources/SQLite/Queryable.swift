@@ -2,15 +2,17 @@ public protocol Queryable {
   associatedtype CodingKeys: CodingKey
 }
 
-public protocol QueryParametersProtocol: Encodable & Queryable {}
+extension Queryable {
+  public typealias Columns = CodingKeys
+}
 
 public protocol Insertable: Queryable {
-  associatedtype Parameters: QueryParametersProtocol where Parameters.CodingKeys == CodingKeys
+  associatedtype Parameters: QueryParameters
 
   static var insert: Insert<Self, Parameters> { get }
 }
 
-public protocol Selectable: Decodable & Queryable {
+public protocol Selectable: Decodable, Queryable {
   static var find: Select<Self, Int64> { get }
 }
 
