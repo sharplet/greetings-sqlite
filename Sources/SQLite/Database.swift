@@ -44,6 +44,10 @@ public final class Database {
     }
   }
 
+  public func execute<Row>(_ query: Query<Row>, rowHandler: ((Row) throws -> Void)? = nil) throws {
+    try query.run(rowHandler: rowHandler)
+  }
+
   public func execute<Row: Decodable>(_ statement: SQLTemplate, as _: Row.Type) throws -> RowEnumerator<Row> {
     let statement = try PreparedStatement(statement: statement, database: self)
     return RowEnumerator(statement: statement)

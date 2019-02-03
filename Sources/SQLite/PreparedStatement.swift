@@ -11,15 +11,19 @@ final class PreparedStatement {
   unowned let database: Database
   private let userInfo: [String: Any]
 
-  init(statement: SQLTemplate, database: Database) throws {
+  init(sql: String, database: Database) throws {
     self.userInfo = database.userInfo
 
-    let status = sqlite3_prepare_v2(database.handle, statement.rawValue, -1, &handle, nil)
+    let status = sqlite3_prepare_v2(database.handle, sql, -1, &handle, nil)
     guard status == SQLITE_OK else {
       throw NSError(domain: SQLiteError.errorDomain, code: Int(status), userInfo: userInfo)
     }
-    self.database = database
 
+    self.database = database
+  }
+
+  convenience init(statement: SQLTemplate, database: Database) throws {
+    try self.init(sql: statement.rawValue, database: database)
     for binding in statement.bindings {
       try binding(self)
     }
@@ -45,6 +49,12 @@ final class PreparedStatement {
     return SQLiteType(rawValue: sqlite3_column_type(handle, Int32(index)))!
   }
 
+  func run() throws {
+    while case .row = try step() {
+      continue
+    }
+  }
+
   func step() throws -> StepResult {
     guard let statement = handle else { return .done }
 
@@ -55,6 +65,21 @@ final class PreparedStatement {
       return .row
     case let error:
       throw NSError(domain: SQLiteError.errorDomain, code: Int(error), userInfo: userInfo)
+    }
+  }
+
+  func reset(clearBindings: Bool = false) throws {
+    var status: Int32
+
+    status = sqlite3_reset(handle)
+    guard status == SQLITE_OK else {
+      throw NSError(domain: SQLiteError.errorDomain, code: Int(status), userInfo: userInfo)
+    }
+
+    guard clearBindings else { return }
+    status = sqlite3_clear_bindings(handle)
+    guard status == SQLITE_OK else {
+      throw NSError(domain: SQLiteError.errorDomain, code: Int(status), userInfo: userInfo)
     }
   }
 
@@ -102,6 +127,35 @@ extension PreparedStatement {
     guard status == SQLITE_OK else {
       throw NSError(domain: SQLiteError.errorDomain, code: Int(status), userInfo: userInfo)
     }
+  }
+}
+
+extension PreparedStatement {
+  private func columnIndex(forBindParameterName name: String) throws -> Int {
+    var index: Int32 = 0
+
+    for prefix in ":@$" where index == 0 {
+      let name = "\(prefix)\(name)"
+      index = sqlite3_bind_parameter_index(handle, name)
+    }
+
+    guard index != 0 else {
+      var userInfo = self.userInfo
+      userInfo["SQLiteBindParameterName"] = name
+      throw NSError(domain: SQLiteError.errorDomain, code: Int(SQLITE_RANGE), userInfo: userInfo)
+    }
+
+    return Int(index)
+  }
+
+  func bind(_ value: Bool, forKey key: String) throws {
+    let index = try columnIndex(forBindParameterName: key)
+    try bind(value, at: index)
+  }
+
+  func bind(_ value: String, forKey key: String) throws {
+    let index = try columnIndex(forBindParameterName: key)
+    try bind(value, at: index)
   }
 }
 

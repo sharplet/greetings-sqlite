@@ -21,12 +21,13 @@ func fail(_ message: String, status: Int32) -> Never {
 func main() throws {
   let parameters = try Parameters(arguments: CommandLine.arguments)
   let database = try Database(createIfNecessaryAtPath: parameters.path)
+  Database.setCurrent(database, queue: .main)
 
   try database.execute(
     """
     CREATE TABLE IF NOT EXISTS greetings (
       text TEXT NOT NULL,
-      is_friendly INTEGER DEFAULT 0
+      is_friendly INTEGER NOT NULL DEFAULT 0
     )
     """
   )
