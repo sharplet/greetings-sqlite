@@ -34,8 +34,8 @@ extension Greeting: Selectable {
 extension Greeting: Insertable {
   struct Parameters: QueryParameters {
     static let bindings: Bindings<Greeting> = [
-      .text <- \.text,
-      .isFriendly <- \.isFriendly,
+      Columns.text <- \.text,
+      Columns.isFriendly <- \.isFriendly,
     ]
 
     var text: String
