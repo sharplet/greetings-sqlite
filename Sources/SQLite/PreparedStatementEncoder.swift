@@ -33,7 +33,7 @@ private struct KeyedStatementEncoder<Key: CodingKey>: KeyedEncodingContainerProt
     self.statement = statement
   }
 
-  mutating func encodeNil(forKey key: Key) throws {
+  mutating func encodeNil(forKey _: Key) throws {
     fatalError()
   }
 
@@ -45,51 +45,51 @@ private struct KeyedStatementEncoder<Key: CodingKey>: KeyedEncodingContainerProt
     try statement.bind(value, forKey: key.stringValue)
   }
 
-  mutating func encode(_ value: Double, forKey key: Key) throws {
+  mutating func encode(_: Double, forKey _: Key) throws {
     fatalError()
   }
 
-  mutating func encode(_ value: Float, forKey key: Key) throws {
+  mutating func encode(_: Float, forKey _: Key) throws {
     fatalError()
   }
 
-  mutating func encode(_ value: Int, forKey key: Key) throws {
+  mutating func encode(_: Int, forKey _: Key) throws {
     fatalError()
   }
 
-  mutating func encode(_ value: Int8, forKey key: Key) throws {
+  mutating func encode(_: Int8, forKey _: Key) throws {
     fatalError()
   }
 
-  mutating func encode(_ value: Int16, forKey key: Key) throws {
+  mutating func encode(_: Int16, forKey _: Key) throws {
     fatalError()
   }
 
-  mutating func encode(_ value: Int32, forKey key: Key) throws {
+  mutating func encode(_: Int32, forKey _: Key) throws {
     fatalError()
   }
 
-  mutating func encode(_ value: Int64, forKey key: Key) throws {
+  mutating func encode(_: Int64, forKey _: Key) throws {
     fatalError()
   }
 
-  mutating func encode(_ value: UInt, forKey key: Key) throws {
+  mutating func encode(_: UInt, forKey _: Key) throws {
     fatalError()
   }
 
-  mutating func encode(_ value: UInt8, forKey key: Key) throws {
+  mutating func encode(_: UInt8, forKey _: Key) throws {
     fatalError()
   }
 
-  mutating func encode(_ value: UInt16, forKey key: Key) throws {
+  mutating func encode(_: UInt16, forKey _: Key) throws {
     fatalError()
   }
 
-  mutating func encode(_ value: UInt32, forKey key: Key) throws {
+  mutating func encode(_: UInt32, forKey _: Key) throws {
     fatalError()
   }
 
-  mutating func encode(_ value: UInt64, forKey key: Key) throws {
+  mutating func encode(_: UInt64, forKey _: Key) throws {
     fatalError()
   }
 
@@ -98,11 +98,11 @@ private struct KeyedStatementEncoder<Key: CodingKey>: KeyedEncodingContainerProt
     try value.encode(to: encoder)
   }
 
-  mutating func nestedContainer<NestedKey>(keyedBy keyType: NestedKey.Type, forKey key: Key) -> KeyedEncodingContainer<NestedKey> {
+  mutating func nestedContainer<NestedKey>(keyedBy _: NestedKey.Type, forKey _: Key) -> KeyedEncodingContainer<NestedKey> {
     fatalError()
   }
 
-  mutating func nestedUnkeyedContainer(forKey key: Key) -> UnkeyedEncodingContainer {
+  mutating func nestedUnkeyedContainer(forKey _: Key) -> UnkeyedEncodingContainer {
     fatalError()
   }
 
@@ -165,27 +165,27 @@ private struct SingleValueStatementEncoder: SingleValueEncodingContainer {
     }
   }
 
-  mutating func encode(_ value: Double) throws {
+  mutating func encode(_: Double) throws {
     fatalError()
   }
 
-  mutating func encode(_ value: Float) throws {
+  mutating func encode(_: Float) throws {
     fatalError()
   }
 
-  mutating func encode(_ value: Int) throws {
+  mutating func encode(_: Int) throws {
     fatalError()
   }
 
-  mutating func encode(_ value: Int8) throws {
+  mutating func encode(_: Int8) throws {
     fatalError()
   }
 
-  mutating func encode(_ value: Int16) throws {
+  mutating func encode(_: Int16) throws {
     fatalError()
   }
 
-  mutating func encode(_ value: Int32) throws {
+  mutating func encode(_: Int32) throws {
     fatalError()
   }
 
@@ -194,27 +194,27 @@ private struct SingleValueStatementEncoder: SingleValueEncodingContainer {
     try statement.bind(value, at: index)
   }
 
-  mutating func encode(_ value: UInt) throws {
+  mutating func encode(_: UInt) throws {
     fatalError()
   }
 
-  mutating func encode(_ value: UInt8) throws {
+  mutating func encode(_: UInt8) throws {
     fatalError()
   }
 
-  mutating func encode(_ value: UInt16) throws {
+  mutating func encode(_: UInt16) throws {
     fatalError()
   }
 
-  mutating func encode(_ value: UInt32) throws {
+  mutating func encode(_: UInt32) throws {
     fatalError()
   }
 
-  mutating func encode(_ value: UInt64) throws {
+  mutating func encode(_: UInt64) throws {
     fatalError()
   }
 
-  mutating func encode<T: Encodable>(_ value: T) throws {
+  mutating func encode<T: Encodable>(_: T) throws {
     fatalError()
   }
 }

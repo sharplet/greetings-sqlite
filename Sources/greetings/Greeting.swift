@@ -23,10 +23,10 @@ extension Greeting: Queryable {
 extension Greeting: Selectable {
   static let find: Select<Greeting, Int64> = try! Select(
     sql: """
-      SELECT rowid, text, is_friendly
-      FROM greetings
-      WHERE rowid = ?
-      """,
+    SELECT rowid, text, is_friendly
+    FROM greetings
+    WHERE rowid = ?
+    """,
     in: .current
   )
 }
@@ -52,17 +52,17 @@ extension Greeting: Insertable {
 
   static let insert: Insert<Greeting, Parameters> = try! Insert(
     sql: """
-      INSERT INTO greetings (text, is_friendly)
-      VALUES (:text, :is_friendly)
-      """,
+    INSERT INTO greetings (text, is_friendly)
+    VALUES (:text, :is_friendly)
+    """,
     in: .current
   )
 
   static let insertText = try! Insert<Greeting, String>(
     sql: """
-      INSERT INTO greetings (text)
-      VALUES (?)
-      """,
+    INSERT INTO greetings (text)
+    VALUES (?)
+    """,
     in: .current
   )
 }

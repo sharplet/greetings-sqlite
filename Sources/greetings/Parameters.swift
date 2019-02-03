@@ -11,7 +11,7 @@ extension Parameters {
   }
 
   init<Arguments: RangeReplaceableCollection>(arguments: Arguments, dropFirst: Bool = true) throws where Arguments.Element == String {
-    var arguments = dropFirst ? arguments.dropFirst() : arguments[... ]
+    var arguments = dropFirst ? arguments.dropFirst() : arguments[...]
     var mode = ParsingMode.option
     var isFriendly: Bool?
     var newGreeting: String?
@@ -48,5 +48,4 @@ extension Parameters {
     self.newGreeting = newGreeting
     self.path = path
   }
-
 }
