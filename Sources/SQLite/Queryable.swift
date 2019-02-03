@@ -6,4 +6,6 @@ public protocol QueryParametersProtocol: Encodable & Queryable {}
 
 public protocol Insertable: Queryable {
   associatedtype Parameters: QueryParametersProtocol where Parameters.CodingKeys == CodingKeys
+
+  static var insert: Insert<Self, Parameters> { get }
 }
