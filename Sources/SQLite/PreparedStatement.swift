@@ -141,7 +141,7 @@ extension PreparedStatement {
 
     guard index != 0 else {
       var userInfo = self.userInfo
-      userInfo["SQLiteBindParameterName"] = name
+      userInfo[SQLiteError.bindParameterNameErrorKey] = name
       throw NSError(domain: SQLiteError.errorDomain, code: Int(SQLITE_RANGE), userInfo: userInfo)
     }
 

@@ -69,6 +69,10 @@ public struct SQLiteError: _BridgedStoredNSError {
   public typealias Code = SQLiteErrorCode
 }
 
+extension SQLiteError {
+  public static let bindParameterNameErrorKey = "SQLiteBindParameterName"
+}
+
 extension SQLiteErrorCode: _ErrorCodeProtocol {
   // swiftlint:disable:next type_name
   public typealias _ErrorType = SQLiteError
