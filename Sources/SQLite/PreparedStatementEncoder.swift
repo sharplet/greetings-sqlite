@@ -174,7 +174,8 @@ private struct SingleValueStatementEncoder: SingleValueEncodingContainer {
   }
 
   mutating func encode(_ value: Int64) throws {
-    fatalError()
+    let index = try getIndex(for: value)
+    try statement.bind(value, at: index)
   }
 
   mutating func encode(_ value: UInt) throws {

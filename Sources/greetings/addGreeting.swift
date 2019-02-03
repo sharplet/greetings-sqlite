@@ -4,9 +4,10 @@ func addGreeting(_ text: String, isFriendly: Bool?, in database: Database) throw
   let insertGreeting = try Greeting.insert(text: text, isFriendly: isFriendly)
 
   var greeting: Greeting?
+
   try database.execute(insertGreeting) { id in
-    var result = try database.execute("SELECT text, is_friendly FROM greetings WHERE rowid = \(id)", as: Greeting.self)
-    greeting = try result.next()
+    let find = try Greeting.find(byRowID: id)
+    try database.execute(find) { greeting = $0 }
   }
 
   return greeting!

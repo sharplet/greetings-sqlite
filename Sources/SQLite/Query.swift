@@ -1,8 +1,8 @@
 public struct Query<Row> {
-  private let getRow: (PreparedStatement) -> Row
+  private let getRow: (PreparedStatement, PreparedStatement.StepResult) throws -> Row?
   private let statement: PreparedStatement
 
-  init(statement: PreparedStatement, getRow: @escaping (PreparedStatement) -> Row) {
+  init(statement: PreparedStatement, getRow: @escaping (PreparedStatement, PreparedStatement.StepResult) throws -> Row?) {
     self.getRow = getRow
     self.statement = statement
   }
@@ -13,8 +13,9 @@ public struct Query<Row> {
         var state: PreparedStatement.StepResult
         repeat {
           state = try statement.step()
-          let result = getRow(statement)
-          try rowHandler(result)
+          if let result = try getRow(statement, state) {
+            try rowHandler(result)
+          }
         } while state != .done
       } else {
         try statement.run()

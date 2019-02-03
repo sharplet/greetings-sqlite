@@ -18,6 +18,17 @@ extension Greeting: Decodable, Queryable {
   }
 }
 
+extension Greeting: Selectable {
+  static let find: Select<Greeting, Int64> = try! Select(
+    sql: """
+      SELECT text, is_friendly
+      FROM greetings
+      WHERE rowid = ?
+      """,
+    in: .current
+  )
+}
+
 extension Greeting: Insertable {
   struct Parameters: QueryParametersProtocol {
     typealias CodingKeys = Greeting.CodingKeys
