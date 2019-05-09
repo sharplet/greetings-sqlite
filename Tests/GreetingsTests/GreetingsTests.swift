@@ -12,7 +12,7 @@ final class GreetingsTests: XCTestCase {
       return
     }
 
-    let fooBinary = productsDirectory.appendingPathComponent("swift_sqlite")
+    let fooBinary = productsDirectory.appendingPathComponent("greetings")
 
     let process = Process()
     process.executableURL = fooBinary
@@ -26,7 +26,7 @@ final class GreetingsTests: XCTestCase {
     let data = pipe.fileHandleForReading.readDataToEndOfFile()
     let output = String(data: data, encoding: .utf8)
 
-    XCTAssertEqual(output, "Hello, world!\n")
+    XCTAssertEqual(output, "")
   }
 
   /// Returns path to the built products directory.
