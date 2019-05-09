@@ -9,7 +9,10 @@ extension ProcessInfo {
 }
 
 func fail(_ error: Swift.Error) -> Never {
-  let message = ProcessInfo.processInfo.isDebugEnabled ? "\(error)" : error.consoleDescription
+  let message = ProcessInfo.processInfo.isDebugEnabled
+    ? "\(error)"
+    : error.consoleDescription
+
   fail(message, status: error.exitStatus)
 }
 
@@ -33,7 +36,12 @@ func main() throws {
   )
 
   if let newGreeting = parameters.newGreeting {
-    let greeting = try addGreeting(newGreeting, isFriendly: parameters.isFriendly, in: database)
+    let greeting = try addGreeting(
+      newGreeting,
+      isFriendly: parameters.isFriendly,
+      in: database
+    )
+
     print("Inserted: \(greeting)")
   } else {
     try printGreetings(in: database)
