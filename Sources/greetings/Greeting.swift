@@ -13,7 +13,7 @@ extension Greeting: CustomStringConvertible {
 }
 
 extension Greeting: Queryable {
-  enum CodingKeys: String, CodingKey {
+  enum CodingKeys: String, Column {
     case id = "rowid"
     case text
     case isFriendly = "is_friendly"
@@ -21,22 +21,20 @@ extension Greeting: Queryable {
 }
 
 extension Greeting: Selectable {
-  static let all: Select<Greeting, Void> = try! Select(
-    sql: """
-    SELECT rowid, text, is_friendly
+  static let all = Database.select(Greeting.self) { columns in
+    """
+    SELECT \(columns)
     FROM greetings
-    """,
-    in: .current
-  )
+    """
+  }
 
-  static let find: Select<Greeting, Int64> = try! Select(
-    sql: """
-    SELECT rowid, text, is_friendly
+  static let find = Database.select(Greeting.self, parameters: Int64.self) { columns in
+    """
+    SELECT \(columns)
     FROM greetings
-    WHERE rowid = ?
-    """,
-    in: .current
-  )
+    WHERE \(columns.id) = ?
+    """
+  }
 }
 
 extension Greeting: Insertable {

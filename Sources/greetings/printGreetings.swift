@@ -3,7 +3,7 @@ import SQLite
 func printGreetings(in database: Database) throws {
   var foundGreetings = false
 
-  try database.execute(Greeting.all.bind()) { greeting in
+  try database.execute(Greeting.all) { greeting in
     if !foundGreetings {
       foundGreetings = true
       print("Greetings:")

@@ -45,6 +45,10 @@ public final class Database {
     }
   }
 
+  public func execute<Row>(_ query: Select<Row, Void>, rowHandler: ((Row) throws -> Void)? = nil) throws {
+    try query.bind().run(rowHandler: rowHandler)
+  }
+
   public func execute<Row>(_ query: Query<Row>, rowHandler: ((Row) throws -> Void)? = nil) throws {
     try query.run(rowHandler: rowHandler)
   }

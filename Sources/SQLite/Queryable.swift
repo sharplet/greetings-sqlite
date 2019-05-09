@@ -1,5 +1,7 @@
+public typealias Column = CaseIterable & CodingKey
+
 public protocol Queryable {
-  associatedtype CodingKeys: CodingKey
+  associatedtype CodingKeys: Column
 }
 
 extension Queryable {
