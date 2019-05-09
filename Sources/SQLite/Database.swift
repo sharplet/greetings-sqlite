@@ -31,6 +31,7 @@ public final class Database {
 
     guard status == SQLITE_OK else {
       // If we can't close a database we just opened, something is really wrong.
+      // swiftlint:disable:next force_try
       try! close()
       throw NSError(domain: SQLiteError.errorDomain, code: Int(status), userInfo: userInfo)
     }
