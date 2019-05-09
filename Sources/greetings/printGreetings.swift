@@ -1,18 +1,17 @@
 import SQLite
 
 func printGreetings(in database: Database) throws {
-  var query = try database.execute("SELECT rowid, text, is_friendly FROM greetings", as: Greeting.self)
-  var results: [Greeting] = []
-  while let greeting = try query.next() {
-    results.append(greeting)
+  var foundGreetings = false
+
+  try database.execute(Greeting.all.bind()) { greeting in
+    if !foundGreetings {
+      foundGreetings = true
+      print("Greetings:")
+    }
+    print("- \(greeting)")
   }
 
-  if results.isEmpty {
+  if !foundGreetings {
     print("No greetings")
-  } else {
-    print("Greetings:")
-    for greeting in results {
-      print("- \(greeting)")
-    }
   }
 }

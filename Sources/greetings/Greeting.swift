@@ -21,6 +21,14 @@ extension Greeting: Queryable {
 }
 
 extension Greeting: Selectable {
+  static let all: Select<Greeting, Void> = try! Select(
+    sql: """
+    SELECT rowid, text, is_friendly
+    FROM greetings
+    """,
+    in: .current
+  )
+
   static let find: Select<Greeting, Int64> = try! Select(
     sql: """
     SELECT rowid, text, is_friendly
